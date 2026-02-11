@@ -198,6 +198,8 @@ elif page == "🔮 Make Prediction":
     
     with col1:
         age = st.number_input("Age", min_value=17, max_value=90, value=35)
+        fnlwgt = st.number_input("Final Weight (Census)", min_value=10000, max_value=1500000, value=200000, 
+                                  help="Census final weight - leave at default if unsure")
         workclass = st.selectbox("Workclass", 
             ['Private', 'Self-emp-not-inc', 'Self-emp-inc', 'Federal-gov', 
              'Local-gov', 'State-gov', 'Without-pay', 'Never-worked'])
@@ -241,6 +243,7 @@ elif page == "🔮 Make Prediction":
         # Create input dataframe
         input_data = pd.DataFrame({
             'age': [age],
+            'fnlwgt': [fnlwgt],
             'workclass': [workclass],
             'education': [education],
             'education-num': [education_num],
