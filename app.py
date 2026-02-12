@@ -38,7 +38,7 @@ st.markdown("""
 
 # Load models and preprocessing objects
 @st.cache_resource
-def load_models():
+def load_models(version="v2"):  # Change version to bust cache
     """Load all trained models and preprocessing objects"""
     models = {}
     model_files = {
@@ -85,9 +85,9 @@ st.markdown('<h1 class="main-header">💰 Adult Income Classification</h1>', uns
 st.markdown("---")
 
 # Sidebar navigation
-page = st.sidebar.selectbox(
+page = st.sidebar.radio(
     "Navigation",
-    ["🏠 Home", "📊 Model Comparison", "🔮 Make Prediction", "📖 About"]
+    ["🏠 Home", "📊 Model Comparison", "🔮 Make Prediction", "📥 Download Test Data", "📖 About"]
 )
 
 # Load models and results
@@ -293,6 +293,80 @@ elif page == "🔮 Make Prediction":
             
         except Exception as e:
             st.error(f"Prediction error: {e}")
+
+# DOWNLOAD TEST DATA PAGE
+elif page == "📥 Download Test Data":
+    st.header("Download Test Dataset")
+    
+    st.write("""
+    Download a sample CSV file with the same format expected by the prediction model.
+    You can use this template to prepare bulk predictions or test the model.
+    """)
+    
+    # Create sample data
+    sample_data = pd.DataFrame({
+        'age': [35, 42, 28, 55, 38],
+        'fnlwgt': [200000, 150000, 180000, 250000, 220000],
+        'workclass': ['Private', 'Self-emp-not-inc', 'Private', 'Private', 'Federal-gov'],
+        'education': ['Bachelors', 'HS-grad', 'Some-college', 'Masters', 'Bachelors'],
+        'education-num': [13, 9, 10, 14, 13],
+        'marital-status': ['Married-civ-spouse', 'Never-married', 'Never-married', 'Married-civ-spouse', 'Divorced'],
+        'occupation': ['Exec-managerial', 'Craft-repair', 'Sales', 'Prof-specialty', 'Exec-managerial'],
+        'relationship': ['Husband', 'Not-in-family', 'Not-in-family', 'Husband', 'Not-in-family'],
+        'race': ['White', 'White', 'Black', 'White', 'Asian-Pac-Islander'],
+        'sex': ['Male', 'Male', 'Female', 'Male', 'Female'],
+        'capital-gain': [0, 0, 0, 15024, 0],
+        'capital-loss': [0, 0, 0, 0, 0],
+        'hours-per-week': [40, 45, 40, 50, 40],
+        'native-country': ['United-States', 'United-States', 'United-States', 'United-States', 'India']
+    })
+    
+    # Display sample data
+    st.subheader("Sample Data Preview")
+    st.dataframe(sample_data, use_container_width=True)
+    
+    # Convert to CSV
+    csv = sample_data.to_csv(index=False)
+    
+    # Download buttons
+    col1, col2 = st.columns([1, 3])
+    with col1:
+        st.download_button(
+            label="📥 Download CSV",
+            data=csv,
+            file_name="adult_income_test_data.csv",
+            mime="text/csv",
+        )
+    
+    st.markdown("---")
+    st.subheader("📋 Column Descriptions")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write("""
+        **Numerical Features:**
+        - `age`: Age in years
+        - `fnlwgt`: Final weight (census weight)
+        - `education-num`: Education level (1-16)
+        - `capital-gain`: Capital gains
+        - `capital-loss`: Capital losses
+        - `hours-per-week`: Hours worked per week
+        """)
+    
+    with col2:
+        st.write("""
+        **Categorical Features:**
+        - `workclass`: Employment type
+        - `education`: Highest education level
+        - `marital-status`: Marital status
+        - `occupation`: Job category
+        - `relationship`: Family relationship
+        - `race`: Race category
+        - `sex`: Gender
+        - `native-country`: Country of origin
+        """)
+    
+    st.info("💡 **Tip**: You can edit this CSV file and use it for batch predictions by loading it into the prediction page.")
 
 # ABOUT PAGE
 elif page == "📖 About":
