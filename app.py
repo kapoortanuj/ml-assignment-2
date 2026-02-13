@@ -42,12 +42,12 @@ def load_models(version="v2"):  # Change version to bust cache
     """Load all trained models and preprocessing objects"""
     models = {}
     model_files = {
-        'Logistic Regression': 'models/logistic_regression.pkl',
-        'Decision Tree': 'models/decision_tree.pkl',
-        'K-Nearest Neighbor': 'models/k-nearest_neighbor.pkl',
-        'Naive Bayes': 'models/naive_bayes_gaussian.pkl',
-        'Random Forest': 'models/random_forest.pkl',
-        'XGBoost': 'models/xgboost.pkl'
+        'Logistic Regression': 'model/logistic_regression.pkl',
+        'Decision Tree': 'model/decision_tree.pkl',
+        'K-Nearest Neighbor': 'model/k-nearest_neighbor.pkl',
+        'Naive Bayes': 'model/naive_bayes_gaussian.pkl',
+        'Random Forest': 'model/random_forest.pkl',
+        'XGBoost': 'model/xgboost.pkl'
     }
     
     for name, filepath in model_files.items():
@@ -56,9 +56,9 @@ def load_models(version="v2"):  # Change version to bust cache
                 models[name] = pickle.load(f)
     
     # Load preprocessor and label encoder
-    with open('models/preprocessor.pkl', 'rb') as f:
+    with open('model/preprocessor.pkl', 'rb') as f:
         preprocessor = pickle.load(f)
-    with open('models/label_encoder.pkl', 'rb') as f:
+    with open('model/label_encoder.pkl', 'rb') as f:
         label_encoder = pickle.load(f)
     
     return models, preprocessor, label_encoder
@@ -548,7 +548,7 @@ elif page == "📥 Download Test Data":
     
     # Load test data from CSV
     try:
-        test_data = pd.read_csv('test_data_sample.csv')
+        test_data = pd.read_csv('model/test_data_sample.csv')
         
         # Show dataset info
         st.markdown("---")
