@@ -82,6 +82,20 @@ def load_results():
     }
     return pd.DataFrame(results)
 
+@st.cache_data
+def load_confusion_matrices():
+    """Load actual confusion matrix values from notebook run"""
+    # Real confusion matrices from notebook: [[TN, FP], [FN, TP]]
+    confusion_matrices = {
+        'Logistic Regression': np.array([[6689, 528], [912, 1396]]),
+        'Decision Tree': np.array([[6811, 406], [943, 1365]]),
+        'K-Nearest Neighbor': np.array([[6550, 667], [884, 1424]]),
+        'Naive Bayes': np.array([[4027, 3190], [206, 2102]]),
+        'Random Forest': np.array([[6876, 341], [973, 1335]]),
+        'XGBoost': np.array([[6831, 386], [790, 1518]])
+    }
+    return confusion_matrices
+
 # Main header
 st.markdown('<h1 class="main-header">💰 Adult Income Classification</h1>', unsafe_allow_html=True)
 st.markdown("---")
@@ -105,6 +119,7 @@ page = st.session_state.page
 try:
     models, preprocessor, label_encoder = load_models()
     results_df = load_results()
+    confusion_matrices = load_confusion_matrices()
 except Exception as e:
     st.error(f"Error loading models: {e}")
     st.stop()
@@ -196,7 +211,7 @@ elif page == "📊 Model Comparison":
     st.subheader("🎯 Confusion Matrices - All Models")
     st.write("Visual representation of prediction accuracy for each model")
     
-    # Derive confusion matrices from real notebook metrics
+    # Use actual confusion matrices from notebook run
     fig_cm, axes_cm = plt.subplots(2, 3, figsize=(18, 12))
     fig_cm.suptitle('Confusion Matrices - All Classification Models', fontsize=16, fontweight='bold', y=0.995)
     
@@ -205,27 +220,16 @@ elif page == "📊 Model Comparison":
     model_names = results_df['Model'].tolist()
     cm_colors = ['Blues', 'Greens', 'Oranges', 'Purples', 'Reds', 'YlOrBr']
     
-    # Calculate confusion matrices from real metrics (accuracy, precision, recall)
+    # Display actual confusion matrices from notebook results
     for idx, model_name in enumerate(model_names):
         ax = axes_cm[idx // 3, idx % 3]
         
+        # Get actual confusion matrix from notebook
+        cm = confusion_matrices[model_name]
+        tn, fp, fn, tp = cm[0, 0], cm[0, 1], cm[1, 0], cm[1, 1]
+        
+        # Get accuracy for display
         accuracy = results_df.loc[idx, 'Accuracy']
-        precision = results_df.loc[idx, 'Precision']
-        recall = results_df.loc[idx, 'Recall']
-        
-        # Use actual test set size and class distribution from notebook
-        total_samples = 9769
-        positive_actual = int(total_samples * 0.24)  # ~24% are >50K
-        negative_actual = total_samples - positive_actual
-        
-        # Derive confusion matrix values from metrics
-        tp = int(positive_actual * recall)
-        fn = positive_actual - tp
-        total_predicted_positive = int(tp / precision) if precision > 0 else tp
-        fp = total_predicted_positive - tp
-        tn = negative_actual - fp
-        
-        cm = np.array([[tn, fp], [fn, tp]])
         
         disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['<=50K', '>50K'])
         disp.plot(ax=ax, cmap=cm_colors[idx], colorbar=False)
