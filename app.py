@@ -195,114 +195,233 @@ elif page == "📊 Model Comparison":
 # PREDICTION PAGE
 elif page == "🔮 Make Prediction":
     st.header("Make Income Prediction")
-    st.write("Enter the details below to predict if income exceeds $50K/year")
     
-    # Select model
-    selected_model = st.selectbox("Select Model", list(models.keys()))
+    # Create tabs for single vs batch prediction
+    tab1, tab2 = st.tabs(["📝 Single Prediction", "📤 Batch Upload (CSV)"])
     
-    st.markdown("---")
-    st.subheader("Input Features")
-    
-    # Create input form
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        age = st.number_input("Age", min_value=17, max_value=90, value=35)
-        fnlwgt = st.number_input("Final Weight (Census)", min_value=10000, max_value=1500000, value=200000, 
-                                  help="Census final weight - leave at default if unsure")
-        workclass = st.selectbox("Workclass", 
-            ['Private', 'Self-emp-not-inc', 'Self-emp-inc', 'Federal-gov', 
-             'Local-gov', 'State-gov', 'Without-pay', 'Never-worked'])
-        education = st.selectbox("Education",
-            ['Bachelors', 'Some-college', '11th', 'HS-grad', 'Prof-school',
-             'Assoc-acdm', 'Assoc-voc', '9th', '7th-8th', '12th', 'Masters',
-             '1st-4th', '10th', 'Doctorate', '5th-6th', 'Preschool'])
-        education_num = st.number_input("Education-Num", min_value=1, max_value=16, value=10)
-        marital_status = st.selectbox("Marital Status",
-            ['Married-civ-spouse', 'Divorced', 'Never-married', 'Separated',
-             'Widowed', 'Married-spouse-absent', 'Married-AF-spouse'])
-        occupation = st.selectbox("Occupation",
-            ['Tech-support', 'Craft-repair', 'Other-service', 'Sales',
-             'Exec-managerial', 'Prof-specialty', 'Handlers-cleaners',
-             'Machine-op-inspct', 'Adm-clerical', 'Farming-fishing',
-             'Transport-moving', 'Priv-house-serv', 'Protective-serv',
-             'Armed-Forces'])
-    
-    with col2:
-        relationship = st.selectbox("Relationship",
-            ['Wife', 'Own-child', 'Husband', 'Not-in-family', 
-             'Other-relative', 'Unmarried'])
-        race = st.selectbox("Race",
-            ['White', 'Asian-Pac-Islander', 'Amer-Indian-Eskimo', 'Other', 'Black'])
-        sex = st.selectbox("Sex", ['Male', 'Female'])
-        capital_gain = st.number_input("Capital Gain", min_value=0, max_value=100000, value=0)
-        capital_loss = st.number_input("Capital Loss", min_value=0, max_value=5000, value=0)
-        hours_per_week = st.number_input("Hours per Week", min_value=1, max_value=99, value=40)
-        native_country = st.selectbox("Native Country",
-            ['United-States', 'Cambodia', 'England', 'Puerto-Rico', 'Canada',
-             'Germany', 'Outlying-US(Guam-USVI-etc)', 'India', 'Japan', 'Greece',
-             'South', 'China', 'Cuba', 'Iran', 'Honduras', 'Philippines', 'Italy',
-             'Poland', 'Jamaica', 'Vietnam', 'Mexico', 'Portugal', 'Ireland',
-             'France', 'Dominican-Republic', 'Laos', 'Ecuador', 'Taiwan',
-             'Haiti', 'Columbia', 'Hungary', 'Guatemala', 'Nicaragua',
-             'Scotland', 'Thailand', 'Yugoslavia', 'El-Salvador',
-             'Trinadad&Tobago', 'Peru', 'Hong', 'Holand-Netherlands'])
-    
-    # Predict button
-    if st.button("🔮 Predict Income", type="primary"):
-        # Create input dataframe
-        input_data = pd.DataFrame({
-            'age': [age],
-            'fnlwgt': [fnlwgt],
-            'workclass': [workclass],
-            'education': [education],
-            'education-num': [education_num],
-            'marital-status': [marital_status],
-            'occupation': [occupation],
-            'relationship': [relationship],
-            'race': [race],
-            'sex': [sex],
-            'capital-gain': [capital_gain],
-            'capital-loss': [capital_loss],
-            'hours-per-week': [hours_per_week],
-            'native-country': [native_country]
-        })
+    # TAB 1: Single Prediction
+    with tab1:
+        st.write("Enter the details below to predict if income exceeds $50K/year")
         
-        try:
-            # Preprocess input
-            X_processed = preprocessor.transform(input_data)
-            
-            # Make prediction
-            model = models[selected_model]
-            prediction = model.predict(X_processed)[0]
-            prediction_proba = model.predict_proba(X_processed)[0]
-            
-            # Display results
-            st.markdown("---")
-            st.subheader("Prediction Results")
-            
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                income_class = label_encoder.inverse_transform([prediction])[0]
-                if prediction == 1:
-                    st.success(f"### Predicted Income: {income_class}")
-                else:
-                    st.info(f"### Predicted Income: {income_class}")
-            
-            with col2:
-                st.metric("Confidence", f"{prediction_proba[prediction]:.2%}")
-            
-            # Probability distribution
-            st.subheader("Probability Distribution")
-            prob_df = pd.DataFrame({
-                'Income Class': label_encoder.classes_,
-                'Probability': prediction_proba
+        # Select model
+        selected_model = st.selectbox("Select Model", list(models.keys()), key="single_model")
+        
+        st.markdown("---")
+        st.subheader("Input Features")
+        
+        # Create input form
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            age = st.number_input("Age", min_value=17, max_value=90, value=35)
+            fnlwgt = st.number_input("Final Weight (Census)", min_value=10000, max_value=1500000, value=200000, 
+                                      help="Census final weight - leave at default if unsure")
+            workclass = st.selectbox("Workclass", 
+                ['Private', 'Self-emp-not-inc', 'Self-emp-inc', 'Federal-gov', 
+                 'Local-gov', 'State-gov', 'Without-pay', 'Never-worked'])
+            education = st.selectbox("Education",
+                ['Bachelors', 'Some-college', '11th', 'HS-grad', 'Prof-school',
+                 'Assoc-acdm', 'Assoc-voc', '9th', '7th-8th', '12th', 'Masters',
+                 '1st-4th', '10th', 'Doctorate', '5th-6th', 'Preschool'])
+            education_num = st.number_input("Education-Num", min_value=1, max_value=16, value=10)
+            marital_status = st.selectbox("Marital Status",
+                ['Married-civ-spouse', 'Divorced', 'Never-married', 'Separated',
+                 'Widowed', 'Married-spouse-absent', 'Married-AF-spouse'])
+            occupation = st.selectbox("Occupation",
+                ['Tech-support', 'Craft-repair', 'Other-service', 'Sales',
+                 'Exec-managerial', 'Prof-specialty', 'Handlers-cleaners',
+                 'Machine-op-inspct', 'Adm-clerical', 'Farming-fishing',
+                 'Transport-moving', 'Priv-house-serv', 'Protective-serv',
+                 'Armed-Forces'])
+        
+        with col2:
+            relationship = st.selectbox("Relationship",
+                ['Wife', 'Own-child', 'Husband', 'Not-in-family', 
+                 'Other-relative', 'Unmarried'])
+            race = st.selectbox("Race",
+                ['White', 'Asian-Pac-Islander', 'Amer-Indian-Eskimo', 'Other', 'Black'])
+            sex = st.selectbox("Sex", ['Male', 'Female'])
+            capital_gain = st.number_input("Capital Gain", min_value=0, max_value=100000, value=0)
+            capital_loss = st.number_input("Capital Loss", min_value=0, max_value=5000, value=0)
+            hours_per_week = st.number_input("Hours per Week", min_value=1, max_value=99, value=40)
+            native_country = st.selectbox("Native Country",
+                ['United-States', 'Cambodia', 'England', 'Puerto-Rico', 'Canada',
+                 'Germany', 'Outlying-US(Guam-USVI-etc)', 'India', 'Japan', 'Greece',
+                 'South', 'China', 'Cuba', 'Iran', 'Honduras', 'Philippines', 'Italy',
+                 'Poland', 'Jamaica', 'Vietnam', 'Mexico', 'Portugal', 'Ireland',
+                 'France', 'Dominican-Republic', 'Laos', 'Ecuador', 'Taiwan',
+                 'Haiti', 'Columbia', 'Hungary', 'Guatemala', 'Nicaragua',
+                 'Scotland', 'Thailand', 'Yugoslavia', 'El-Salvador',
+                 'Trinadad&Tobago', 'Peru', 'Hong', 'Holand-Netherlands'])
+        
+        # Predict button
+        if st.button("🔮 Predict Income", type="primary"):
+            # Create input dataframe
+            input_data = pd.DataFrame({
+                'age': [age],
+                'fnlwgt': [fnlwgt],
+                'workclass': [workclass],
+                'education': [education],
+                'education-num': [education_num],
+                'marital-status': [marital_status],
+                'occupation': [occupation],
+                'relationship': [relationship],
+                'race': [race],
+                'sex': [sex],
+                'capital-gain': [capital_gain],
+                'capital-loss': [capital_loss],
+                'hours-per-week': [hours_per_week],
+                'native-country': [native_country]
             })
-            st.bar_chart(prob_df.set_index('Income Class'))
             
-        except Exception as e:
-            st.error(f"Prediction error: {e}")
+            try:
+                # Preprocess input
+                X_processed = preprocessor.transform(input_data)
+                
+                # Make prediction
+                model = models[selected_model]
+                prediction = model.predict(X_processed)[0]
+                prediction_proba = model.predict_proba(X_processed)[0]
+                
+                # Display results
+                st.markdown("---")
+                st.subheader("Prediction Results")
+                
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    income_class = label_encoder.inverse_transform([prediction])[0]
+                    if prediction == 1:
+                        st.success(f"### Predicted Income: {income_class}")
+                    else:
+                        st.info(f"### Predicted Income: {income_class}")
+                
+                with col2:
+                    st.metric("Confidence", f"{prediction_proba[prediction]:.2%}")
+                
+                # Probability distribution
+                st.subheader("Probability Distribution")
+                prob_df = pd.DataFrame({
+                    'Income Class': label_encoder.classes_,
+                    'Probability': prediction_proba
+                })
+                st.bar_chart(prob_df.set_index('Income Class'))
+                
+            except Exception as e:
+                st.error(f"Prediction error: {e}")
+    
+    # TAB 2: Batch CSV Upload
+    with tab2:
+        st.write("""
+        Upload a CSV file containing test data to make predictions on multiple records.
+        The CSV should have the same format as downloaded from the 'Download Test Data' page.
+        """)
+        
+        # Model selection for batch
+        batch_model = st.selectbox("Select Model for Batch Prediction", list(models.keys()), key="batch_model")
+        
+        # File uploader
+        uploaded_file = st.file_uploader("Upload CSV File", type=['csv'], 
+                                          help="Upload a CSV file with the required columns")
+        
+        if uploaded_file is not None:
+            try:
+                # Read uploaded CSV
+                upload_df = pd.read_csv(uploaded_file)
+                
+                st.success(f"✓ File uploaded successfully! {len(upload_df)} rows found.")
+                
+                # Display uploaded data preview
+                st.subheader("Uploaded Data Preview (First 5 Rows)")
+                st.dataframe(upload_df.head(), use_container_width=True)
+                
+                # Required columns
+                required_cols = ['age', 'fnlwgt', 'workclass', 'education', 'education-num', 
+                                'marital-status', 'occupation', 'relationship', 'race', 'sex',
+                                'capital-gain', 'capital-loss', 'hours-per-week', 'native-country']
+                
+                # Check if all required columns are present
+                missing_cols = [col for col in required_cols if col not in upload_df.columns]
+                
+                if missing_cols:
+                    st.error(f"Missing required columns: {', '.join(missing_cols)}")
+                    st.info("Please download the test data template to see the required format.")
+                else:
+                    # Remove 'income' column if present (it's the target)
+                    feature_df = upload_df[required_cols].copy()
+                    
+                    # Predict button
+                    if st.button("🚀 Run Batch Predictions", type="primary"):
+                        with st.spinner(f"Making predictions on {len(feature_df)} rows using {batch_model}..."):
+                            try:
+                                # Preprocess data
+                                X_batch = preprocessor.transform(feature_df)
+                                
+                                # Make predictions
+                                model = models[batch_model]
+                                predictions = model.predict(X_batch)
+                                predictions_proba = model.predict_proba(X_batch)
+                                
+                                # Decode predictions
+                                predicted_labels = label_encoder.inverse_transform(predictions)
+                                confidence_scores = predictions_proba.max(axis=1)
+                                proba_high_income = predictions_proba[:, 1]
+                                
+                                # Create results dataframe
+                                results_df = upload_df.copy()
+                                results_df['predicted_income'] = predicted_labels
+                                results_df['confidence'] = confidence_scores
+                                results_df['probability_>50K'] = proba_high_income
+                                results_df['probability_<=50K'] = predictions_proba[:, 0]
+                                
+                                st.success("✓ Predictions completed successfully!")
+                                
+                                # Display results summary
+                                st.subheader("Prediction Summary")
+                                col1, col2, col3 = st.columns(3)
+                                
+                                with col1:
+                                    st.metric("Total Predictions", len(results_df))
+                                with col2:
+                                    high_income_count = (predicted_labels == '>50K').sum()
+                                    st.metric("Predicted >50K", high_income_count)
+                                with col3:
+                                    low_income_count = (predicted_labels == '<=50K').sum()
+                                    st.metric("Predicted <=50K", low_income_count)
+                                
+                                # Display results table
+                                st.subheader("Prediction Results (First 10 Rows)")
+                                st.dataframe(results_df.head(10), use_container_width=True)
+                                
+                                # Download results
+                                st.markdown("---")
+                                st.subheader("Download Results")
+                                
+                                # Convert to CSV
+                                csv_results = results_df.to_csv(index=False)
+                                
+                                col1, col2 = st.columns([1, 3])
+                                with col1:
+                                    st.download_button(
+                                        label="📥 Download Results CSV",
+                                        data=csv_results,
+                                        file_name=f"predictions_{batch_model.replace(' ', '_').lower()}.csv",
+                                        mime="text/csv",
+                                    )
+                                
+                                with col2:
+                                    st.info(f"Results include: original data + predicted_income + confidence + probabilities")
+                                
+                            except Exception as e:
+                                st.error(f"Prediction error: {str(e)}")
+                                st.info("Please ensure your CSV has the correct column names and data types.")
+                        
+            except Exception as e:
+                st.error(f"Error reading CSV file: {str(e)}")
+                st.info("Please ensure you're uploading a valid CSV file with the correct format.")
+        
+        else:
+            st.info("👆 Upload a CSV file to get started. Download the test data template from the 'Download Test Data' page if needed.")
 
 # DOWNLOAD TEST DATA PAGE
 elif page == "📥 Download Test Data":
