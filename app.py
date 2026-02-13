@@ -128,6 +128,12 @@ except Exception as e:
 if page == "🏠 Home":
     st.header("Welcome to Adult Income Classifier")
     
+    st.markdown("""
+    <div style='text-align: center; padding: 1rem; background-color: #f0f2f6; border-radius: 0.5rem; margin-bottom: 1.5rem;'>
+        <p style='margin: 0; color: #555;'><strong>Name:</strong> Tanuj Kapoor | <strong>Student ID:</strong> 2025AA05734</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
     col1, col2, col3 = st.columns(3)
     with col1:
         st.metric("📚 Models Trained", len(models))
