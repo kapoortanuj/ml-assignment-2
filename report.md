@@ -12,7 +12,7 @@
 
 ## 1. GitHub Repository Link
 
-**Repository URL:** [https://github.com/kapoortanuj/ml-assignment-2/tree/main](https://github.com/kapoortanuj/ml-assignment-2/tree/main)
+**Repository URL:** [https://github.com/kapoortanuj/ml-assignment-2](https://github.com/kapoortanuj/ml-assignment-2)
 
 
 ## 2. Live Streamlit App Link
