@@ -25,7 +25,7 @@
 ![BITS Virtual Lab Screenshot](lab_screenshot.png)
 
 
-# 4. GitHub README Documentation
+## 4. GitHub README Documentation
 
 Below is the complete README.md content from the GitHub repository:
 
