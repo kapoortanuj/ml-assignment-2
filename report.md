@@ -1,11 +1,12 @@
----
-title: "Machine Learning Assignment 2 - Adult Income Classification"
-subtitle: "Binary Classification with Multiple ML Models"
-author: "Student ID: 2025AA05734"
-date: "February 14, 2026"
----
+# Machine Learning Assignment 2 - Adult Income Classification
 
-\newpage
+**Binary Classification with Multiple ML Models**
+
+**Name:** Tanuj Kapoor  
+**ID:** 2025AA05734  
+**Submission Date:** 15/02/2026
+
+---
 
 # Submission Information
 
@@ -13,31 +14,24 @@ date: "February 14, 2026"
 
 **Repository URL:** [https://github.com/kapoortanuj/ml-assignment-2/tree/main](https://github.com/kapoortanuj/ml-assignment-2/tree/main)
 
----
 
 ## 2. Live Streamlit App Link
 
 **Deployed Application:** [https://ml-assignment-2-rt5yyumfo2hj4tmhbnjukd.streamlit.app/](https://ml-assignment-2-rt5yyumfo2hj4tmhbnjukd.streamlit.app/)
 
----
 
 ## 3. Screenshot - BITS Virtual Lab Execution
 
 ![BITS Virtual Lab Screenshot](lab_screenshot.png)
 
-\newpage
 
----
-
-# GitHub README Documentation
+# 4. GitHub README Documentation
 
 Below is the complete README.md content from the GitHub repository:
 
----
+## Adult Income Classification - Machine Learning Project
 
-# Adult Income Classification - Machine Learning Project
-
-## Problem Statement
+### Problem Statement
 
 The objective of this project is to predict whether an individual's annual income exceeds $50,000 based on census data. This is a **binary classification problem** where we aim to classify individuals into two categories:
 - **Income ≤ $50K** (Class-0)
@@ -52,11 +46,11 @@ The challenge lies in building robust machine learning models that can accuratel
 
 ---
 
-## Dataset Description
+### Dataset Description
 
 **Source:** UCI Machine Learning Repository - Adult Income (Census Income) Dataset
 
-### Dataset Overview
+#### Dataset Overview
 - **Total Samples:** ~48,000 (after cleaning)
 - **Features:** 14 mixed attributes
 - **Target Variable:** Income (≤50K or >50K)
@@ -65,7 +59,7 @@ The challenge lies in building robust machine learning models that can accuratel
   - Income ≤50K: ~75%
   - Income >50K: ~25%
 
-### Features
+#### Features
 | Feature | Description | Range |
 |---------|-------------|-------|
 | `age` | Age in years | 17-90 |
@@ -85,7 +79,7 @@ The challenge lies in building robust machine learning models that can accuratel
 
 ---
 
-## Models Used
+### Models Used
 
 This project implements and compares 6 machine learning classification models with hyperparameter tuning:
 
@@ -103,9 +97,9 @@ This project implements and compares 6 machine learning classification models wi
 
 ---
 
-## Model Performance Comparison
+### Model Performance Comparison
 
-### Evaluation Metrics Table
+#### Evaluation Metrics Table
 
 | ML Model Name | Accuracy | AUC | Precision | Recall | F1 Score | MCC |
 |--------------|----------|-----|-----------|--------|----------|-----|
@@ -125,7 +119,7 @@ This project implements and compares 6 machine learning classification models wi
 
 ---
 
-## Model Performance Observations
+### Model Performance Observations
 
 | ML Model Name | Observation about Model Performance |
 |--------------|-------------------------------------|
@@ -136,7 +130,7 @@ This project implements and compares 6 machine learning classification models wi
 | **Random Forest (Ensemble)** | Strong ensemble performance (86.2% accuracy) with size optimization for deployment. Highest precision (0.797) among single models, ensuring reliable positive predictions. The bagging approach reduces variance and provides stable predictions. Feature importance analysis helps understand key income predictors. Size-optimized with 30-50 trees maintains performance while fitting deployment constraints. Robust to outliers and handles non-linear relationships effectively. |
 | **XGBoost (Ensemble)** | **Best overall model** with 87.7% accuracy and superior AUC (0.931). Gradient boosting with regularization achieves excellent balance between precision (0.797) and recall (0.658). Best F1 score (0.721) demonstrates optimal harmonic mean of precision-recall. MCC of 0.647 confirms strong performance on imbalanced data. Advanced features like learning rate scheduling and tree pruning prevent overfitting. The model handles complex feature interactions effectively. Longer training time (267 seconds) justified by significantly better performance. Recommended for production deployment where accuracy is critical. |
 
-### Additional Insights
+#### Additional Insights
 
 **Model Selection:**
 - **Overall Best:** XGBoost (best overall performance)
