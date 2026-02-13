@@ -335,19 +335,34 @@ elif page == "🔮 Make Prediction":
                 st.subheader("Uploaded Data Preview (First 5 Rows)")
                 st.dataframe(upload_df.head(), use_container_width=True)
                 
-                # Required columns
-                required_cols = ['age', 'fnlwgt', 'workclass', 'education', 'education-num', 
+                # Required feature columns (must match training data order)
+                required_cols = ['age', 'workclass', 'fnlwgt', 'education', 'education-num', 
                                 'marital-status', 'occupation', 'relationship', 'race', 'sex',
                                 'capital-gain', 'capital-loss', 'hours-per-week', 'native-country']
                 
                 # Check if all required columns are present
                 missing_cols = [col for col in required_cols if col not in upload_df.columns]
+                extra_info_cols = [col for col in upload_df.columns if col not in required_cols and col != 'income']
                 
                 if missing_cols:
-                    st.error(f"Missing required columns: {', '.join(missing_cols)}")
-                    st.info("Please download the test data template to see the required format.")
+                    st.error(f"❌ Missing required columns: {', '.join(missing_cols)}")
+                    st.info("💡 Please download the test data template to see the required format.")
                 else:
-                    # Remove 'income' column if present (it's the target)
+                    # Show file info
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        st.info(f"📊 **Rows:** {len(upload_df)}")
+                    with col2:
+                        st.info(f"📋 **Features:** {len(required_cols)}")
+                    with col3:
+                        has_labels = 'income' in upload_df.columns
+                        label_icon = "✅" if has_labels else "⚠️"
+                        st.info(f"{label_icon} **Labels:** {'Yes' if has_labels else 'No'}")
+                    
+                    if extra_info_cols:
+                        st.caption(f"Note: Extra columns will be preserved in results: {', '.join(extra_info_cols)}")
+                    
+                    # Extract feature columns in correct order
                     feature_df = upload_df[required_cols].copy()
                     
                     # Predict button
@@ -375,6 +390,88 @@ elif page == "🔮 Make Prediction":
                                 results_df['probability_<=50K'] = predictions_proba[:, 0]
                                 
                                 st.success("✓ Predictions completed successfully!")
+                                
+                                # Check if ground truth 'income' column exists for evaluation
+                                has_ground_truth = 'income' in upload_df.columns
+                                
+                                if has_ground_truth:
+                                    try:
+                                        # Clean ground truth labels (strip whitespace and periods)
+                                        y_true_raw = upload_df['income'].astype(str).str.strip().str.rstrip('.')
+                                        
+                                        # Validate that all labels are recognized
+                                        unique_labels = y_true_raw.unique()
+                                        expected_labels = set(label_encoder.classes_)
+                                        actual_labels = set(unique_labels)
+                                        
+                                        if not actual_labels.issubset(expected_labels):
+                                            unknown_labels = actual_labels - expected_labels
+                                            st.warning(f"⚠️ Unknown income labels found: {unknown_labels}. Expected: {expected_labels}")
+                                            st.info("Skipping confusion matrix due to label mismatch.")
+                                        else:
+                                            # Calculate confusion matrix and metrics
+                                            from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, ConfusionMatrixDisplay
+                                            import matplotlib.pyplot as plt
+                                            
+                                            y_true = label_encoder.transform(y_true_raw)
+                                            cm = confusion_matrix(y_true, predictions)
+                                            
+                                            # Calculate metrics
+                                            accuracy = accuracy_score(y_true, predictions)
+                                            precision = precision_score(y_true, predictions)
+                                            recall = recall_score(y_true, predictions)
+                                            f1 = f1_score(y_true, predictions)
+                                            
+                                            # Display evaluation metrics
+                                            st.markdown("---")
+                                            st.subheader("📊 Model Evaluation Metrics")
+                                            st.success(f"✓ Ground truth labels detected! Evaluating {batch_model} performance:")
+                                            
+                                            col1, col2, col3, col4 = st.columns(4)
+                                            with col1:
+                                                st.metric("Accuracy", f"{accuracy:.4f}")
+                                            with col2:
+                                                st.metric("Precision", f"{precision:.4f}")
+                                            with col3:
+                                                st.metric("Recall", f"{recall:.4f}")
+                                            with col4:
+                                                st.metric("F1 Score", f"{f1:.4f}")
+                                    
+                                            # Display confusion matrix
+                                            st.subheader("🎯 Confusion Matrix")
+                                            
+                                            col1, col2 = st.columns([1, 1])
+                                            
+                                            with col1:
+                                                # Create confusion matrix visualization
+                                                fig, ax = plt.subplots(figsize=(6, 5))
+                                                disp = ConfusionMatrixDisplay(confusion_matrix=cm, 
+                                                                             display_labels=label_encoder.classes_)
+                                                disp.plot(ax=ax, cmap='Blues', colorbar=True)
+                                                ax.set_title(f'Confusion Matrix - {batch_model}', fontsize=12, fontweight='bold')
+                                                st.pyplot(fig)
+                                            
+                                            with col2:
+                                                # Display confusion matrix breakdown
+                                                tn, fp, fn, tp = cm.ravel()
+                                                st.markdown("##### Confusion Matrix Breakdown")
+                                                st.write(f"**True Negatives (TN):** {tn}")
+                                                st.write(f"**False Positives (FP):** {fp}")
+                                                st.write(f"**False Negatives (FN):** {fn}")
+                                                st.write(f"**True Positives (TP):** {tp}")
+                                                
+                                                st.markdown("---")
+                                                st.markdown("##### Additional Metrics")
+                                                specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+                                                sensitivity = tp / (tp + fn) if (tp + fn) > 0 else 0
+                                                st.write(f"**Specificity:** {specificity:.4f}")
+                                                st.write(f"**Sensitivity:** {sensitivity:.4f}")
+                                            
+                                            st.markdown("---")
+                                    
+                                    except Exception as eval_error:
+                                        st.error(f"⚠️ Error evaluating model with ground truth: {str(eval_error)}")
+                                        st.info("Proceeding with predictions only (no evaluation metrics).")
                                 
                                 # Display results summary
                                 st.subheader("Prediction Summary")
@@ -428,44 +525,70 @@ elif page == "📥 Download Test Data":
     st.header("Download Test Dataset")
     
     st.write("""
-    Download real test data from the trained model. This dataset contains actual samples
-    from the test set with the same format expected by the prediction model.
+    Download **real test data** from the trained model. This dataset contains actual samples
+    from the test set with ground truth labels included.
     """)
+    
+    # Info boxes
+    col1, col2 = st.columns(2)
+    with col1:
+        st.info("""
+        **✅ Use for:**
+        - Testing batch predictions
+        - Evaluating model performance
+        - Viewing confusion matrix
+        """)
+    with col2:
+        st.success("""
+        **📊 Includes:**
+        - 100 real test samples
+        - All 14 feature columns
+        - Ground truth `income` labels
+        """)
     
     # Load test data from CSV
     try:
         test_data = pd.read_csv('test_data_sample.csv')
         
-        # Display first 5 rows
-        st.subheader("Sample Preview (First 5 Rows)")
-        st.dataframe(test_data.head(5), use_container_width=True)
-        
         # Show dataset info
-        col1, col2, col3 = st.columns(3)
+        st.markdown("---")
+        col1, col2, col3, col4 = st.columns(4)
         with col1:
             st.metric("Total Samples", len(test_data))
         with col2:
-            st.metric("Features", len(test_data.columns) - 1)  # Exclude target
+            st.metric("Features", 14)
         with col3:
             if 'income' in test_data.columns:
                 income_dist = test_data['income'].value_counts()
+                st.metric("Income ≤50K", f"{income_dist.get('<=50K', 0)}")
+        with col4:
+            if 'income' in test_data.columns:
                 st.metric("Income >50K", f"{income_dist.get('>50K', 0)}")
+        
+        # Display first 5 rows
+        st.subheader("Sample Preview (First 5 Rows)")
+        st.dataframe(test_data.head(5), use_container_width=True)
         
         # Convert to CSV for download
         csv = test_data.to_csv(index=False)
         
         # Download button
+        st.markdown("---")
         col1, col2 = st.columns([1, 3])
         with col1:
             st.download_button(
-                label="📥 Download CSV",
+                label="📥 Download Test Data CSV",
                 data=csv,
                 file_name="adult_income_test_data.csv",
                 mime="text/csv",
             )
+        
+        with col2:
+            st.info("💡 **Tip:** Upload this CSV in the 'Batch Upload' tab to see model evaluation metrics and confusion matrix!")
     
     except FileNotFoundError:
-        st.error("Test data file not found. Please run the notebook to generate 'test_data_sample.csv'.")
+        st.error("❌ Test data file not found. Please run the notebook (Cell 12) to generate 'test_data_sample.csv'.")
+        st.code("# Run this cell in the notebook:\n# Cell 12: Feature Engineering and Train-Test Split", language="python")
     except Exception as e:
         st.error(f"Error loading test data: {e}")
     
