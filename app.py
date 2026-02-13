@@ -68,17 +68,17 @@ def load_models(version="v2"):  # Change version to bust cache
 # Load model performance results
 @st.cache_data
 def load_results():
-    """Load pre-computed model performance results"""
-    # These are example results - you should save these from your notebook
+    """Load pre-computed model performance results from notebook run"""
+    # Real metrics from 2025AA05734-ml-assignment-2.ipynb execution
     results = {
         'Model': ['Logistic Regression', 'Decision Tree', 'K-Nearest Neighbor', 
                   'Naive Bayes', 'Random Forest', 'XGBoost'],
-        'Accuracy': [0.8512, 0.8591, 0.8492, 0.8211, 0.8634, 0.8703],
-        'AUC Score': [0.9056, 0.8845, 0.9021, 0.9001, 0.9124, 0.9201],
-        'Precision': [0.7512, 0.7423, 0.7389, 0.6901, 0.7556, 0.7645],
-        'Recall': [0.6234, 0.6789, 0.6123, 0.6456, 0.6912, 0.7123],
-        'F1 Score': [0.6812, 0.7089, 0.6712, 0.6667, 0.7223, 0.7378],
-        'MCC Score': [0.6234, 0.6456, 0.6112, 0.5789, 0.6534, 0.6701]
+        'Accuracy': [0.8488, 0.8584, 0.8372, 0.6435, 0.8620, 0.8765],
+        'AUC Score': [0.9032, 0.9032, 0.8825, 0.8492, 0.9141, 0.9308],
+        'Precision': [0.7256, 0.7708, 0.6810, 0.3972, 0.7965, 0.7973],
+        'Recall': [0.6049, 0.5914, 0.6170, 0.9107, 0.5784, 0.6577],
+        'F1 Score': [0.6597, 0.6693, 0.6474, 0.5532, 0.6702, 0.7208],
+        'MCC Score': [0.5674, 0.5894, 0.5430, 0.4042, 0.5977, 0.6474]
     }
     return pd.DataFrame(results)
 
@@ -102,7 +102,6 @@ for page_name in pages:
 
 page = st.session_state.page
 
-# Load models and results
 try:
     models, preprocessor, label_encoder = load_models()
     results_df = load_results()
@@ -164,7 +163,6 @@ elif page == "📊 Model Comparison":
     
     st.markdown("---")
     
-    # Visual Comparison with proper metrics display
     st.subheader("📈 Performance Metrics Comparison")
     
     import matplotlib.pyplot as plt
@@ -198,8 +196,7 @@ elif page == "📊 Model Comparison":
     st.subheader("🎯 Confusion Matrices - All Models")
     st.write("Visual representation of prediction accuracy for each model")
     
-    # Create confusion matrices based on model performance
-    # These are example confusion matrices - ideally loaded from notebook results
+    # Derive confusion matrices from real notebook metrics
     fig_cm, axes_cm = plt.subplots(2, 3, figsize=(18, 12))
     fig_cm.suptitle('Confusion Matrices - All Classification Models', fontsize=16, fontweight='bold', y=0.995)
     
@@ -208,22 +205,20 @@ elif page == "📊 Model Comparison":
     model_names = results_df['Model'].tolist()
     cm_colors = ['Blues', 'Greens', 'Oranges', 'Purples', 'Reds', 'YlOrBr']
     
-    # Approximate confusion matrices based on metrics
-    # In reality, these should be loaded from saved notebook results
+    # Calculate confusion matrices from real metrics (accuracy, precision, recall)
     for idx, model_name in enumerate(model_names):
         ax = axes_cm[idx // 3, idx % 3]
         
-        # Calculate approximate confusion matrix from metrics
         accuracy = results_df.loc[idx, 'Accuracy']
         precision = results_df.loc[idx, 'Precision']
         recall = results_df.loc[idx, 'Recall']
         
-        # Assume ~10000 test samples (adjust based on actual data)
-        total_samples = 9769  # Actual test size from notebook
+        # Use actual test set size and class distribution from notebook
+        total_samples = 9769
         positive_actual = int(total_samples * 0.24)  # ~24% are >50K
         negative_actual = total_samples - positive_actual
         
-        # Calculate confusion matrix values
+        # Derive confusion matrix values from metrics
         tp = int(positive_actual * recall)
         fn = positive_actual - tp
         total_predicted_positive = int(tp / precision) if precision > 0 else tp
@@ -232,13 +227,11 @@ elif page == "📊 Model Comparison":
         
         cm = np.array([[tn, fp], [fn, tp]])
         
-        # Display confusion matrix
         disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['<=50K', '>50K'])
         disp.plot(ax=ax, cmap=cm_colors[idx], colorbar=False)
         ax.set_title(f'{model_name}', fontsize=12, fontweight='bold', pad=10)
         ax.grid(False)
         
-        # Add metrics annotations
         text = f'Acc: {accuracy:.3f}\nTP:{tp} TN:{tn}\nFP:{fp} FN:{fn}'
         ax.text(1.15, 0.5, text, transform=ax.transAxes, fontsize=9,
                 verticalalignment='center', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.3))
@@ -248,7 +241,6 @@ elif page == "📊 Model Comparison":
     
     st.markdown("---")
     
-    # Best model highlight
     st.subheader("🏆 Best Performers")
     
     col1, col2, col3 = st.columns(3)
@@ -269,20 +261,17 @@ elif page == "📊 Model Comparison":
 elif page == "🔮 Make Prediction":
     st.header("Make Income Prediction")
     
-    # Create tabs for single vs batch prediction
     tab1, tab2 = st.tabs(["📝 Single Prediction", "📤 Batch Upload (CSV)"])
     
     # TAB 1: Single Prediction
     with tab1:
         st.write("Enter the details below to predict if income exceeds $50K/year")
         
-        # Select model
         selected_model = st.selectbox("Select Model", list(models.keys()), key="single_model")
         
         st.markdown("---")
         st.subheader("Input Features")
         
-        # Create input form
         col1, col2 = st.columns(2)
         
         with col1:
@@ -327,9 +316,7 @@ elif page == "🔮 Make Prediction":
                  'Scotland', 'Thailand', 'Yugoslavia', 'El-Salvador',
                  'Trinadad&Tobago', 'Peru', 'Hong', 'Holand-Netherlands'])
         
-        # Predict button
         if st.button("🔮 Predict Income", type="primary"):
-            # Create input dataframe
             input_data = pd.DataFrame({
                 'age': [age],
                 'fnlwgt': [fnlwgt],
@@ -348,15 +335,12 @@ elif page == "🔮 Make Prediction":
             })
             
             try:
-                # Preprocess input
+                # Preprocess and predict
                 X_processed = preprocessor.transform(input_data)
-                
-                # Make prediction
                 model = models[selected_model]
                 prediction = model.predict(X_processed)[0]
                 prediction_proba = model.predict_proba(X_processed)[0]
                 
-                # Display results
                 st.markdown("---")
                 st.subheader("Prediction Results")
                 
@@ -372,7 +356,6 @@ elif page == "🔮 Make Prediction":
                 with col2:
                     st.metric("Confidence", f"{prediction_proba[prediction]:.2%}")
                 
-                # Probability distribution
                 st.subheader("Probability Distribution")
                 prob_df = pd.DataFrame({
                     'Income Class': label_encoder.classes_,
@@ -390,16 +373,13 @@ elif page == "🔮 Make Prediction":
         The CSV should have the same format as downloaded from the 'Download Test Data' page.
         """)
         
-        # Model selection for batch
         batch_model = st.selectbox("Select Model for Batch Prediction", list(models.keys()), key="batch_model")
         
-        # File uploader
         uploaded_file = st.file_uploader("Upload CSV File", type=['csv'], 
                                           help="Upload a CSV file with the required columns")
         
         if uploaded_file is not None:
             try:
-                # Read uploaded CSV
                 upload_df = pd.read_csv(uploaded_file)
                 
                 st.success(f"✓ File uploaded successfully! {len(upload_df)} rows found.")
@@ -413,7 +393,6 @@ elif page == "🔮 Make Prediction":
                                 'marital-status', 'occupation', 'relationship', 'race', 'sex',
                                 'capital-gain', 'capital-loss', 'hours-per-week', 'native-country']
                 
-                # Check if all required columns are present
                 missing_cols = [col for col in required_cols if col not in upload_df.columns]
                 extra_info_cols = [col for col in upload_df.columns if col not in required_cols and col != 'income']
                 
@@ -421,7 +400,6 @@ elif page == "🔮 Make Prediction":
                     st.error(f"❌ Missing required columns: {', '.join(missing_cols)}")
                     st.info("💡 Please download the test data template to see the required format.")
                 else:
-                    # Show file info
                     col1, col2, col3 = st.columns(3)
                     with col1:
                         st.info(f"📊 **Rows:** {len(upload_df)}")
@@ -438,24 +416,19 @@ elif page == "🔮 Make Prediction":
                     # Extract feature columns in correct order
                     feature_df = upload_df[required_cols].copy()
                     
-                    # Predict button
                     if st.button("🚀 Run Batch Predictions", type="primary"):
                         with st.spinner(f"Making predictions on {len(feature_df)} rows using {batch_model}..."):
                             try:
-                                # Preprocess data
                                 X_batch = preprocessor.transform(feature_df)
                                 
-                                # Make predictions
                                 model = models[batch_model]
                                 predictions = model.predict(X_batch)
                                 predictions_proba = model.predict_proba(X_batch)
                                 
-                                # Decode predictions
                                 predicted_labels = label_encoder.inverse_transform(predictions)
                                 confidence_scores = predictions_proba.max(axis=1)
                                 proba_high_income = predictions_proba[:, 1]
                                 
-                                # Create results dataframe
                                 results_df = upload_df.copy()
                                 results_df['predicted_income'] = predicted_labels
                                 results_df['confidence'] = confidence_scores
@@ -469,10 +442,10 @@ elif page == "🔮 Make Prediction":
                                 
                                 if has_ground_truth:
                                     try:
-                                        # Clean ground truth labels (strip whitespace and periods)
+                                        # Clean ground truth labels
                                         y_true_raw = upload_df['income'].astype(str).str.strip().str.rstrip('.')
                                         
-                                        # Validate that all labels are recognized
+                                        # Validate labels
                                         unique_labels = y_true_raw.unique()
                                         expected_labels = set(label_encoder.classes_)
                                         actual_labels = set(unique_labels)
@@ -482,20 +455,17 @@ elif page == "🔮 Make Prediction":
                                             st.warning(f"⚠️ Unknown income labels found: {unknown_labels}. Expected: {expected_labels}")
                                             st.info("Skipping confusion matrix due to label mismatch.")
                                         else:
-                                            # Calculate confusion matrix and metrics
                                             from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, ConfusionMatrixDisplay
                                             import matplotlib.pyplot as plt
                                             
                                             y_true = label_encoder.transform(y_true_raw)
                                             cm = confusion_matrix(y_true, predictions)
                                             
-                                            # Calculate metrics
                                             accuracy = accuracy_score(y_true, predictions)
                                             precision = precision_score(y_true, predictions)
                                             recall = recall_score(y_true, predictions)
                                             f1 = f1_score(y_true, predictions)
                                             
-                                            # Display evaluation metrics
                                             st.markdown("---")
                                             st.subheader("📊 Model Evaluation Metrics")
                                             st.success(f"✓ Ground truth labels detected! Evaluating {batch_model} performance:")
@@ -510,13 +480,11 @@ elif page == "🔮 Make Prediction":
                                             with col4:
                                                 st.metric("F1 Score", f"{f1:.4f}")
                                     
-                                            # Display confusion matrix
                                             st.subheader("🎯 Confusion Matrix")
                                             
                                             col1, col2 = st.columns([1, 1])
                                             
                                             with col1:
-                                                # Create confusion matrix visualization
                                                 fig, ax = plt.subplots(figsize=(6, 5))
                                                 disp = ConfusionMatrixDisplay(confusion_matrix=cm, 
                                                                              display_labels=label_encoder.classes_)
@@ -525,7 +493,6 @@ elif page == "🔮 Make Prediction":
                                                 st.pyplot(fig)
                                             
                                             with col2:
-                                                # Display confusion matrix breakdown
                                                 tn, fp, fn, tp = cm.ravel()
                                                 st.markdown("##### Confusion Matrix Breakdown")
                                                 st.write(f"**True Negatives (TN):** {tn}")
@@ -546,7 +513,6 @@ elif page == "🔮 Make Prediction":
                                         st.error(f"⚠️ Error evaluating model with ground truth: {str(eval_error)}")
                                         st.info("Proceeding with predictions only (no evaluation metrics).")
                                 
-                                # Display results summary
                                 st.subheader("Prediction Summary")
                                 col1, col2, col3 = st.columns(3)
                                 
@@ -559,15 +525,12 @@ elif page == "🔮 Make Prediction":
                                     low_income_count = (predicted_labels == '<=50K').sum()
                                     st.metric("Predicted <=50K", low_income_count)
                                 
-                                # Display results table
                                 st.subheader("Prediction Results (First 10 Rows)")
                                 st.dataframe(results_df.head(10), use_container_width=True)
                                 
-                                # Download results
                                 st.markdown("---")
                                 st.subheader("Download Results")
                                 
-                                # Convert to CSV
                                 csv_results = results_df.to_csv(index=False)
                                 
                                 col1, col2 = st.columns([1, 3])
@@ -602,7 +565,6 @@ elif page == "📥 Download Test Data":
     from the test set with ground truth labels included.
     """)
     
-    # Info boxes
     col1, col2 = st.columns(2)
     with col1:
         st.info("""
@@ -614,16 +576,14 @@ elif page == "📥 Download Test Data":
     with col2:
         st.success("""
         **📊 Includes:**
-        - 100 real test samples
+        - Real test samples
         - All 14 feature columns
         - Ground truth `income` labels
         """)
     
-    # Load test data from CSV
     try:
         test_data = pd.read_csv('model/test_data_sample.csv')
         
-        # Show dataset info
         st.markdown("---")
         col1, col2, col3, col4 = st.columns(4)
         with col1:
@@ -638,14 +598,11 @@ elif page == "📥 Download Test Data":
             if 'income' in test_data.columns:
                 st.metric("Income >50K", f"{income_dist.get('>50K', 0)}")
         
-        # Display first 5 rows
         st.subheader("Sample Preview (First 5 Rows)")
         st.dataframe(test_data.head(5), use_container_width=True)
         
-        # Convert to CSV for download
         csv = test_data.to_csv(index=False)
         
-        # Download button
         st.markdown("---")
         col1, col2 = st.columns([1, 3])
         with col1:
@@ -746,7 +703,6 @@ elif page == "📖 About":
     st.markdown("---")
     st.info("💡 This experiment demonstrates comprehensive ML model comparison with production-ready deployment.")
 
-# Footer
 st.markdown("---")
 st.markdown(
     """
