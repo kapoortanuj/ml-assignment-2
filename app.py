@@ -662,57 +662,6 @@ elif page == "📥 Download Test Data":
     
     st.info("💡 **Tip**: You can edit this CSV file and use it for batch predictions by loading it into the prediction page.")
 
-# ABOUT PAGE
-elif page == "📖 About":
-    st.header("About This Project")
-    
-    st.subheader("📚 Dataset Information")
-    st.write("""
-    - **Dataset**: Adult Income (Census Income)
-    - **Source**: UCI ML Repository
-    - **Samples**: ~48,000 (after cleaning)
-    - **Features**: 14 (mix of numerical and categorical)
-    - **Target**: Binary classification (>50K vs <=50K income)
-    - **Train-Test Split**: 80-20 with stratification
-    """)
-    
-    st.subheader("🔧 Preprocessing")
-    st.write("""
-    - StandardScaler for numerical features
-    - OneHotEncoder for categorical features
-    - Missing values handled
-    - Target labels cleaned and encoded
-    """)
-    
-    st.subheader("🎛️ Hyperparameter Tuning")
-    st.write("""
-    - **Method**: GridSearchCV with 3-fold cross-validation
-    - **Scoring Metric**: ROC-AUC for optimal class discrimination
-    - **Regularization**: Applied through model-specific parameters
-    - **Benefits**: Improved generalization, reduced overfitting
-    """)
-    
-    st.subheader("📊 Evaluation Metrics")
-    st.write("""
-    - **Accuracy**: Overall classification correctness
-    - **AUC Score**: Area under ROC curve
-    - **Precision**: Positive predictive value
-    - **Recall**: Sensitivity/True positive rate
-    - **F1 Score**: Harmonic mean of precision and recall
-    - **MCC Score**: Matthews Correlation Coefficient
-    """)
-    
-    st.subheader("🚀 Deployment")
-    st.write("""
-    - **Platform**: Streamlit Community Cloud
-    - **Framework**: Streamlit
-    - **Models**: All 6 trained models included
-    - **Interactive**: Real-time predictions and visualizations
-    """)
-    
-    st.markdown("---")
-    st.info("💡 This experiment demonstrates comprehensive ML model comparison with production-ready deployment.")
-
 st.markdown("---")
 st.markdown(
     """
