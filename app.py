@@ -108,7 +108,7 @@ if 'page' not in st.session_state:
 st.sidebar.markdown("### Navigation")
 st.sidebar.markdown("---")
 
-pages = ["🏠 Home", "📊 Model Comparison", "🔮 Make Prediction", "📥 Download Test Data", "📖 About"]
+pages = ["🏠 Home", "📊 Model Comparison", "🔮 Make Prediction", "📥 Download Test Data"]
 
 for page_name in pages:
     if st.sidebar.button(page_name, key=page_name, use_container_width=True):
