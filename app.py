@@ -271,7 +271,7 @@ elif page == "📊 Model Comparison":
 elif page == "🔮 Make Prediction":
     st.header("Make Income Prediction")
     
-    tab1, tab2 = st.tabs(["📝 Single Prediction", "📤 Batch Upload (CSV)"])
+    tab2, tab1 = st.tabs(["📤 Batch Upload (CSV)", "📝 Single Prediction"])
     
     # TAB 1: Single Prediction
     with tab1:
